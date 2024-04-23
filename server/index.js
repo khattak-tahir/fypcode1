@@ -86,20 +86,20 @@ app.delete("/students/:id", async (req, res) => {
         res.status(500).json({ message: "Failed to delete student", error: error.message });
     }
 });
-app.post("/students_login", async (req, res) => {
-    const { aridno, password } = req.body;
-  if(!aridno||!password){
-    return res.status(400).json({ message: "All fields are required" });
-  }
-  try{
-    const student = await prisma.students.findUnique({
-      data: { aridno, password }
-  });
-  res.json(student);
-  } catch (error) {
-  res.status(500).json({ message: "Invalid Credentials", error: error.message });
-  }
-  });
+// app.post("/students_login", async (req, res) => {
+//     const { aridno, password } = req.body;
+//   if(!aridno||!password){
+//     return res.status(400).json({ message: "All fields are required" });
+//   }
+//   try{
+//     const student = await prisma.students.findUnique({
+//       data: { aridno, password }
+//   });
+//   res.json(student);
+//   } catch (error) {
+//   res.status(500).json({ message: "Invalid Credentials", error: error.message });
+//   }
+//   });
 
 app.put("/students/password/:id", async (req, res) => {
     const studentId = parseInt(req.params.id);
@@ -184,20 +184,20 @@ app.delete("/teachers/:id", async (req, res) => {
     }
 });
 
-app.post("/teachers_login", async (req, res) => {
-    const { teacherid, password } = req.body;
-  if(!teacherid||!password){
-    return res.status(400).json({ message: "All fields are required" });
-  }
-  try{
-    const teacher = await prisma.teachers.findUnique({
-      data: { teacherid, password }
-  });
-  res.json(teacher);
-  } catch (error) {
-  res.status(500).json({ message: "Invalid Credentials", error: error.message });
-  }
-  });
+// app.post("/teachers_login", async (req, res) => {
+//     const { teacherid, password } = req.body;
+//   if(!teacherid||!password){
+//     return res.status(400).json({ message: "All fields are required" });
+//   }
+//   try{
+//     const teacher = await prisma.teachers.findUnique({
+//       data: { teacherid, password }
+//   });
+//   res.json(teacher);
+//   } catch (error) {
+//   res.status(500).json({ message: "Invalid Credentials", error: error.message });
+//   }
+//   });
 
 app.put("/teachers/password/:id", async (req, res) => {
     const teacherId = parseInt(req.params.id);
@@ -421,7 +421,59 @@ app.delete("/courses/:id", async (req, res) => {
         }
     }
 });
+// teacher login endpoint
+app.post("/teachers_login", async (req, res) => {
+    const { teacherid, password, role } = req.body;
+  
+    if (!teacherid || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+  
+    const teacher = await prisma.teachers.findUnique({
+      where: { teacherid: teacherid },
+    });
+  
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+  
+    const isPasswordValid = await compare(password, teacher.password);
+  
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+  
+    const token = generateToken(teacher.id, teacher.role);
+  
+    res.json({ token });
+  });
 
+  // Student login endpoint
+app.post("/students_login", async (req, res) => {
+    const { aridno, password, role } = req.body;
+  
+    if (!aridno || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+  
+    const student = await prisma.students.findUnique({
+      where: { aridNo: aridno },
+    });
+  
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+  
+    const isPasswordValid = await bcrypt.compare(password, student.password);
+  
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+  
+    const token = generateToken(student.id, student.role);
+  
+    res.json({ token });
+  });
 
 app.listen(3001, () =>
     console.log('server listening on port 3001'));
