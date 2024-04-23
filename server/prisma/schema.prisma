@@ -1,0 +1,72 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model students {
+    id           Int      @id @default(autoincrement())
+    name         String
+    cnic         Int      @unique
+    aridno       String
+    degree       String
+    shift        String
+    semester     String
+    section      String
+    courses      Json
+    classes_info Json
+    password     String   @default("12345678")
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
+
+model teachers {
+    id            Int      @id @default(autoincrement())
+    name          String
+    cnic          Int      @unique
+    teacherid     String
+    qualification String
+    gender        String
+    courses       Json
+    password      String   @default("12345678")
+    createdAt     DateTime @default(now())
+    updateAt      DateTime @updatedAt
+}
+
+model classes {
+    id        Int      @id @default(autoincrement())
+    name      String
+    semester  String
+    section   String
+    shift     String
+    classroom String   @unique
+    classtime String
+    teacher   String
+    course    String
+    createdAt DateTime @default(now())
+    updateAt  DateTime @updatedAt
+}
+
+model reports {
+    id            Int      @id @default(autoincrement())
+    name          String
+    email         String
+    class_section String
+    aridno        String
+    degree        String   @unique
+    review        String
+    createdAt     DateTime @default(now())
+    updateAt      DateTime @updatedAt
+}
+
+model courses {
+    id          Int      @id @default(autoincrement())
+    name        String
+    course_code String   @unique
+    description String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
