@@ -423,7 +423,7 @@ app.delete("/courses/:id", async (req, res) => {
 });
 // teacher login endpoint
 app.post("/teachers_login", async (req, res) => {
-    const { teacherid, password, role } = req.body;
+    const { teacherid, password } = req.body;
   
     if (!teacherid || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -437,20 +437,19 @@ app.post("/teachers_login", async (req, res) => {
       return res.status(404).json({ message: "Teacher not found" });
     }
   
-    const isPasswordValid = await compare(password, teacher.password);
+    const isPasswordValid = await compare(password.toString(), teacher.password.toString());
   
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
   
-    const token = generateToken(teacher.id, teacher.role);
   
-    res.json({ token });
+    res.json({ teacher });
   });
 
   // Student login endpoint
 app.post("/students_login", async (req, res) => {
-    const { aridno, password, role } = req.body;
+    const { aridno, password } = req.body;
   
     if (!aridno || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -464,15 +463,14 @@ app.post("/students_login", async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
   
-    const isPasswordValid = await bcrypt.compare(password, student.password);
+    const isPasswordValid = await compare(password.toString(), student.password.toString());
   
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
   
-    const token = generateToken(student.id, student.role);
   
-    res.json({ token });
+    res.json({ student });
   });
 
 app.listen(3001, () =>
